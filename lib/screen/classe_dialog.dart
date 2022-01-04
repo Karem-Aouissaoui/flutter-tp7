@@ -1,19 +1,14 @@
 import 'dart:convert';
-
-
 import 'package:flutter/material.dart';
 import 'package:tp7/models/classe.dart';
 import 'package:http/http.dart' as http;
-
-import 'dashboard.dart';
+import 'package:tp7/screen/gestion_classes.dart';
 
 class ClasseDialog {
   final txtCodClass = TextEditingController();
   final txtNomClass = TextEditingController();
   final txtNbreEtud = TextEditingController();
   Widget buildDialog(BuildContext context) {
-
-
     return AlertDialog(
         title: Text('Class list'),
         shape:
@@ -23,6 +18,7 @@ class ClasseDialog {
           child: Column(children: <Widget>[
             TextField(
                 controller: txtCodClass,
+                keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                     hintText: 'Class Code')
             ),
@@ -35,7 +31,7 @@ class ClasseDialog {
               controller: txtNbreEtud,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
-                  hintText: 'Class List numbre of students'
+                  hintText: 'numbre of students'
               ),
             ),
             ElevatedButton(
@@ -49,14 +45,16 @@ class ClasseDialog {
                 var url = 'http://10.0.2.2:8080/classes';
                 var res = await http.post(Uri.parse(url),
                     headers: {'Content-Type': 'application/json'},
-                    body: classe.toJson());
+                    body: json.encode(classe.toJson()));
                 print(res.body);
                 if (res.body != null) {
+                  print('insertion avec succes');
+                  Navigator.pop(context);
                   Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => Dashboard(),
-                      ));
+                      MaterialPageRoute(builder: (context) => GestionClasse(),));
+                }else{
+                  print('erreur insertion');
                 }
               },
             ),

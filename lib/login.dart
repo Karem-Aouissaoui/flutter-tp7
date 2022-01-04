@@ -1,9 +1,8 @@
+import 'package:flutter/material.dart';
 import 'dart:convert';
-import 'package:flutter/cupertino.dart';
 import 'package:tp7/dashboard.dart';
 import 'package:tp7/register.dart';
 import 'models/user.dart';
-import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 
@@ -14,9 +13,11 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+
   final _formKey = GlobalKey<FormState>();
+  String url = 'http://10.0.2.2:8080/login';
   User user = User("", "");
-  String url = "http://10.0.2.2:8080/login";//end point url
+
 
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
@@ -30,18 +31,14 @@ class _LoginState extends State<Login> {
       Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => Dashboard(),
+            builder: (context) => DashboardThree(),
           ));
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //appBar: AppBar(
-      // title: Text("Start"),
-      //),
         body: Center(
             child: SingleChildScrollView(
                 child: Form(
@@ -59,7 +56,7 @@ class _LoginState extends State<Login> {
                               height: 570.0,
                               width: 340.0,
                               decoration: const BoxDecoration(
-                                color: Colors.greenAccent,
+                                color: Colors.pink,
 
                                 borderRadius: BorderRadius.all(
                                   Radius.circular(20.0)
@@ -73,7 +70,7 @@ class _LoginState extends State<Login> {
                                       textStyle: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 50.0,
-                                        color: Colors.green,
+                                        color: Colors.orange,
                                       ),
                                     ),
                                   ),
@@ -106,7 +103,7 @@ class _LoginState extends State<Login> {
                                     child: const Text(
                                       "Sign Up now",
                                       style: TextStyle(
-                                        color: Colors.indigo,
+                                        color: Colors.white,
                                         fontSize: 18.0,
                                         decoration: TextDecoration.underline,
                                       ),
@@ -117,7 +114,7 @@ class _LoginState extends State<Login> {
                                           MaterialPageRoute(builder: (context) => Register())
                                       );
                                     },
-                                  )
+                                  ),
                                 ],
                               ),
                             ),
@@ -138,7 +135,7 @@ class _LoginState extends State<Login> {
                               child: Icon(Icons.arrow_forward,color: Colors.white,),
                               style: ButtonStyle(
                                   shape: MaterialStateProperty.all(CircleBorder()),
-                                  backgroundColor: MaterialStateProperty.all(Colors.red)
+                                  backgroundColor: MaterialStateProperty.all(Colors.orangeAccent)
                               ),
                             ),
                           )

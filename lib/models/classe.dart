@@ -22,6 +22,14 @@ class Classe{
     );
   }
 
+  Map<String, dynamic> map() {
+    return {
+      'codClass' : codClass,
+      'nomClass' : nomClass,
+      'nbreEtud' : nbreEtud
+    };
+  }
+
   @override
   String toString() {
     return 'Classe{codClass: $codClass, nomClass: $nomClass, nbreEtud: $nbreEtud}';
