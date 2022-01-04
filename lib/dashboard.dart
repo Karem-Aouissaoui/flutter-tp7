@@ -1,106 +1,130 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:dart_ipify/dart_ipify.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:tp7/models/etudiant.dart';
-import 'package:network_info_plus/network_info_plus.dart';
-import 'package:tp7/routes/list_etudiants.dart';
-
+import 'package:tp7/provider/list_provider.dart';
 import 'models/classe.dart';
+import 'dao.dart';
+import 'package:provider/provider.dart';
 
-class Dashboard extends StatefulWidget {
-  const Dashboard({Key? key}) : super(key: key);
+class DashboardThree extends StatefulWidget {
+  const DashboardThree({Key? key}) : super(key: key);
 
   @override
-  _DashboardState createState() => _DashboardState();
+  _DashboardThreeState createState() => _DashboardThreeState();
 }
 
-class _DashboardState extends State<Dashboard> {
-  var classe;
+class _DashboardThreeState extends State<DashboardThree> {
+  GlobalKey<FormState>? _formKey;
+  List<Classe> classes = [];
+  List<Etudiant> etudiants = [];
+  Classe? _selectClasse;
+  var taskitems ;
+  void initClasses() async{
+    classes = await getClasses();
+    print (classes.length);
+    for (Classe c in classes){
+      print (c);
+    }
+  }
+  /*
+  void setEtudiants() async{
+    etudiants = await getEtudiantsbyClasse(_selectClasse!.codClass);
+    for (Etudiant e in etudiants)
+      print (e.id);
+  }
+  */
+
+  @override
+  void initState(){
+    super.initState();
+    _formKey= GlobalKey();
+    initClasses();
+    taskitems = Provider.of<ListProvider>(context, listen: false);
+  }
+
   @override
   Widget build(BuildContext context) {
-    //test();
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dashboard | List des Classes'),
+        title: const Text('Liste des étudiants'),
       ),
-      body: Container(
-        child: FutureBuilder(
-            future: getClasses(),
-            builder: (BuildContext context, AsyncSnapshot snapshot) {
-              if (snapshot.data == null) {
-                return Container(
-                  child: Center(
-                    child: Icon(Icons.error),
-                  ),
+      body: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              alignment: Alignment.topCenter,
+              margin: const EdgeInsets.only(bottom: 20, top: 10),
+              child: const Text(
+                'Les Classes',
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
+              ),
+            ),
+            //================================================== liste des classes
+            (classes == [])? const Text('classes[] est vide'):
+            Container(
+                height: 50,
+                padding: const EdgeInsets.only(left: 15, right: 15, top: 5),
+                color: Colors.white,
+                child: DropdownButton<Classe>(
+                  hint: const Text('Choisir une classe'),
+                  value:_selectClasse ,
+                  isExpanded: true,
+                  items: classes.map<DropdownMenuItem<Classe>>((Classe value){
+                    return DropdownMenuItem<Classe>(
+                      value: value,
+                      child: Text(value.nomClass),
+                    );
+                  }).toList(),
+                  onChanged: (newValue){
+                    setState(() {
+                      _selectClasse = newValue!;
+                      taskitems.loadItems(newValue.codClass);
+                      etudiants = taskitems.list;
+                      print ('selected classe = $_selectClasse');
+                    });
+                  },
+
+                )
+            ),
+            const SizedBox(
+              height: 30.0,
+            ),
+            //======================================================Liste des étudiants
+            LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints viewportConstraints) {
+                return SingleChildScrollView(
+                    child: Container(
+                      color: Colors.white,
+                      height: 500.0,
+                      padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
+                      child: Consumer<ListProvider>(builder: (context, provider, listTile){
+                        return ListView.builder(
+                          itemCount: etudiants.length,
+                          itemBuilder: buildList,
+                        );
+                      }),
+                    ),
                 );
               }
-              //print(snapshot.data!.length);
-              return ListView.builder(
-                itemCount: snapshot.data.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                    title: Text(snapshot.data[index].nomClass),
-                    subtitle: Text('${snapshot.data[index].nbreEtud} étudiants'),
-                    leading: CircleAvatar(
-                      child: Text(snapshot.data[index].codClass.toString()),
-                    ),
-                      trailing: IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () {
-
-                        },
-                      ),
-                    onTap: () {
-
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ListEtudiant(
-                              classe: Classe(
-                                snapshot.data[index].codClass,
-                                snapshot.data[index].nomClass,
-                                snapshot.data[index].nbreEtud
-                              )
-                            ),
-                          ),
-                      );
-                    },
-                  );
-                },
-              );
-            }),
+            )
+          ]
       ),
     );
   }
-}
+  //========================================provider test===============/
+  Widget buildList(BuildContext context, int index){
+    return ListTile(
+      title: Text(etudiants[index].nom+' '+etudiants[index].prenom),
+      subtitle: Text('Date de naissance: '+etudiants[index].dateNais),
+      trailing: Wrap(
+        spacing: 12, // space between two icons
+        children: const <Widget>[
+          Icon(Icons.edit), // icon-1
+          Icon(Icons.delete), // icon-2
+        ],
+      ),
+      onTap: (){
 
-
-// methode getClasses qui va recuperer tous
-// les classes (n'oublions pas de créer un controlleur de Classe)
-Future<List<Classe>> getClasses() async {
-  var data = await http.get(Uri.parse('http://10.0.2.2:8080/classes/all'));
-  var jsonData = json.decode(data.body);
-
-  List<Classe> classes = [];
-  for (var c in jsonData) {
-    Classe classe = Classe(
-      c['codClass'],
-      c['nomClass'],
-      c['nbreEtud'],
+      },
     );
-    classes.add(classe);
-    //print(classe.toString());
   }
-  //print('length classes = ${classes.length}');
-  return classes;
-}
-
-
-Future test() async{
-  var data = await http.get(Uri.parse('http://10.0.2.2:8080/classes/all'));
-  print (data.body);
 }
